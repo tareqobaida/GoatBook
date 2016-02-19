@@ -1,25 +1,31 @@
 import unittest
+
 from django.test import TestCase
-from django.template.loader import render_to_string
-from django.http import HttpRequest
-from lists.models import Item
-from lists.views import home_page
+
+from lists.models import Item, List
+
 
 # Create your tests here.
-class ItemModelTest(TestCase):
+class ListAndItemModelTest(TestCase):
     def test_saving_and_retrieving_items(self):
-        first_item=Item()
-        first_item.text='The First list item'
+        list_ = List()
+        list_.save()
+        first_item = Item()
+        first_item.text = 'The First list item'
+        first_item.list = list_
         first_item.save()
-        second_item=Item()
-        second_item.text='Item the second'
+        second_item = Item()
+        second_item.text = 'Item the second'
+        second_item.list = list_
         second_item.save()
-        saved_items=Item.objects.all()
+        saved_items = Item.objects.all()
         self.assertEqual(saved_items.count(), 2)
-        first_saved_item=saved_items[0]
-        second_saved_item=saved_items[1]
-        self.assertEqual(first_saved_item.text,'The First list item' )
-        self.assertEqual(second_saved_item.text,'Item the second' )
+        first_saved_item = saved_items[0]
+        second_saved_item = saved_items[1]
+        self.assertEqual(first_saved_item.text, 'The First list item')
+        self.assertEqual(first_saved_item.list, list_)
+        self.assertEqual(second_saved_item.text, 'Item the second')
+        self.assertEqual(second_saved_item.list, list_)
 
 
 class HomePageTest(TestCase):
@@ -55,6 +61,7 @@ class NewListTest(TestCase):
             data={'item_text': 'A new list item'}
         )
         self.assertRedirects(response, '/lists/the-only-list-in-the-world/')
+
 
 if __name__ == '__main__':
     unittest.main()
