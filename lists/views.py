@@ -2,9 +2,9 @@ from django.shortcuts import render, redirect
 from django.core.exceptions import ValidationError
 from django.utils.html import escape
 from .models import Item, List
-from .forms import ItemForm
 
-
+from lists.forms import ItemForm
+from lists.models import Item, List
 # Create your views here.
 def home_page(request):
     return render(request, 'home.html', {'form':ItemForm()})
