@@ -3,10 +3,17 @@ from html import escape
 from django.test import TestCase
 
 from lists.models import Item, List
+from lists.forms import ItemForm
 
 
 class HomePageTest(TestCase):
-    pass
+    def test_home_page_renders_home_template(self):
+        response = self.client.get('/')
+        self.assertTemplateUsed(response, 'home.html') #1
+
+    def test_home_page_uses_item_form(self):
+        response = self.client.get('/')
+        self.assertIsInstance(response.context['form'], ItemForm)
 
 
 class ListViewTest(TestCase):
@@ -32,7 +39,8 @@ class ListViewTest(TestCase):
         other_list = List.objects.create()
         correct_list = List.objects.create()
         response = self.client.post(
-            '/lists/%d/' % (correct_list.id)
+            '/lists/%d/' % (correct_list.id),
+            data={'item_text': 'A new item for an existing list'}
         )
         self.assertEqual(response.context['list'], correct_list)
 
