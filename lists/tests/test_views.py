@@ -1,13 +1,30 @@
 import unittest
 from html import escape
 from django.test import TestCase
+from django.http import HttpRequest
+from django.template.loader import render_to_string
+from lists.forms import ItemForm
+from lists.views import home_page
 
 from lists.models import Item, List
 
 
 class HomePageTest(TestCase):
-    pass
+    maxDiff = None
+    def test_home_page_renders_home_template(self):
+        response = self.client.get('/')
+        self.assertTemplateUsed(response, 'home.html') #1
 
+
+    def test_home_page_uses_item_form(self):
+        response = self.client.get('/')
+        self.assertIsInstance(response.context['form'], ItemForm)
+
+    def test_home_page_returns_correct_html(self):
+        request = HttpRequest()
+        response = home_page(request)
+        expected_html = render_to_string('home.html', {'form': ItemForm()})
+        self.assertMultiLineEqual(response.content.decode(), expected_html)
 
 class ListViewTest(TestCase):
     def test_displays_only_items_for_that_list(self):
@@ -32,7 +49,8 @@ class ListViewTest(TestCase):
         other_list = List.objects.create()
         correct_list = List.objects.create()
         response = self.client.post(
-            '/lists/%d/' % (correct_list.id)
+               '/lists/%d/' % (correct_list.id),
+            data={'item_text': 'A new item for an existing list'}
         )
         self.assertEqual(response.context['list'], correct_list)
 
